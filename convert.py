@@ -19,9 +19,9 @@ TN = "TelephoneNumber"
 VALID_ACTIONS = ["ASSIGN", "UNASSIGN"]
 
 usage = """
-python <file_name> <directory_destination> <action_value> <order_id>
+python convert.py <file_name> <directory_destination> <action_value> <order_id>
 
-example: python numbers.csv xml-files ASSIGN ID-123
+example: python convert.py numbers.csv xml-files ASSIGN ID-123
 
 
 The directory must already be created, and should not include and ending /
