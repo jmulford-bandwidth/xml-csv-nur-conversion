@@ -16,8 +16,16 @@ ORDER_ID = "CustomerOrderId"
 ACTION = "Action"
 TNS = "TelephoneNumbers"
 TN = "TelephoneNumber"
-
 VALID_ACTIONS = ["ASSIGN", "UNASSIGN"]
+
+usage = """
+python <file_name> <directory_destination> <action_value> <order_id>
+
+example: python numbers.csv xml-files ASSIGN ID-123
+
+
+The directory must already be created, and should not include and ending /
+"""
 
 def to_xml_from_csv(file_name, directory_destination, action_value, order_id):
     """
@@ -33,16 +41,11 @@ def to_xml_from_csv(file_name, directory_destination, action_value, order_id):
     Returns:
         void
     """
-    # Open file for reading
-    # Initialize empty xml dictionary with the following structure
-    #  dict["TelephoneNumbersAssignmentOrder"] = {}
-    #  dict["TelephoneNumbersAssignmentOrder"]["CustomerOrderId"] = <>
-    #  dict["TNAO"]["Action"] = ASSIGN/UNASSIGN
-    #  dict["TNAO"]["TelephoneNumbers"] = {}
-    #  dict["TNAO"]["TelephoneNumbers"]["TelephoneNumber"] = []
-    # Write dict (xmltodict.unparse(dict)) once 5000 numbers are added
-    # Clear dict["TNAO"]["TNs"]["TN"]
-    # Rinse and repeat
+    if not action_value in VALID_ACTIONS:
+        print("The following are the only valid actions:")
+        print(VALID_ACTIONS)
+        return
+
     nur_xml_dict = {}
     nur_xml_dict[TNAO] = {}
     nur_xml_dict[TNAO][ORDER_ID] = order_id
@@ -58,11 +61,30 @@ def to_xml_from_csv(file_name, directory_destination, action_value, order_id):
         for row in csv_reader_iter:
             nur_xml_dict[TNAO][TNS][TN].append(row[0])
 
-            if len(nur_xml_dict[TNAO][TNS][TN] >= 5000):
+            if len(nur_xml_dict[TNAO][TNS][TN]) >= 5000:
                 # Write nur_xml_dict
                 with open(directory_destination + "/" + str(count) + ".xml", "x") as f:
-                    f.write(xmltodict.unparse(nur_xml_dict)
+                    f.write(xmltodict.unparse(nur_xml_dict))
 
                 # clear nur_xml_dict[TNAO][TNS][TN]
                 nur_xml_dict[TNAO][TNS][TN] = []
                 count += 1
+
+        with open(directory_destination + "/" + str(count) + ".xml", "x") as f:
+            f.write(xmltodict.unparse(nur_xml_dict))
+
+    print("Finished")
+
+
+if __name__ == '__main__':
+    import sys
+    try:
+        file_name = sys.argv[1]
+        directory_destination = sys.argv[2]
+        action_value = sys.argv[3]
+        order_id = sys.argv[4]
+    except:
+        print(usage)
+        exit(-1)
+
+    to_xml_from_csv(file_name, directory_destination, action_value, order_id)
